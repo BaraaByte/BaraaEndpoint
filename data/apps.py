@@ -4,6 +4,6 @@ APPS = [
         "name": "HealingHerb",
         "path": "/apis/healing-herbs",
         "desc": "Herbal & healing API",
-        "health": "Stable"
+        "health": "Deleted"
     }
 ]

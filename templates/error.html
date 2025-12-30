@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if error_code %}{{ error_code }} - {% endif %}Error</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .error-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .error-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .error-code {
+            font-size: 72px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+        
+        .error-title {
+            font-size: 24px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        
+        .error-body {
+            padding: 40px;
+        }
+        
+        .error-message {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #555;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .error-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 120px;
+        }
+        
+        .detail-value {
+            flex: 1;
+            word-break: break-all;
+        }
+        
+        .traceback-container {
+            margin-top: 30px;
+        }
+        
+        .traceback-toggle {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .traceback-toggle:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .traceback-content {
+            background: #1a1a2e;
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            display: none;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .traceback-content.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+        
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .timestamp {
+            color: #718096;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        @media (max-width: 768px) {
+            .error-body {
+                padding: 20px;
+            }
+            
+            .error-code {
+                font-size: 48px;
+            }
+            
+            .detail-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .detail-label {
+                min-width: auto;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-header">
+            <div class="error-code">{{ error_code }}</div>
+            <div class="error-title">{{ error_name }}</div>
+        </div>
+        
+        <div class="error-body">
+            <div class="error-message">
+                {{ error_description }}
+            </div>
+            
+            <div class="error-details">
+                <div class="detail-item">
+                    <span class="detail-label">Method:</span>
+                    <span class="detail-value">{{ request.method }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Path:</span>
+                    <span class="detail-value">{{ request.path }}</span>
+                </div>
+                {% if request.args %}
+                <div class="detail-item">
+                    <span class="detail-label">Query Params:</span>
+                    <span class="detail-value">{{ request.args|tojson }}</span>
+                </div>
+                {% endif %}
+                {% if error_traceback and error_code|int >= 500 %}
+                <div class="traceback-container">
+                    <button class="traceback-toggle" onclick="toggleTraceback()">
+                        <i class="fas fa-code icon"></i>
+                        Show Full Traceback
+                    </button>
+                    <div class="traceback-content" id="traceback-content">
+{{ error_traceback }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="actions">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-home icon"></i>
+                    Go to Home
+                </a>
+                <a href="javascript:history.back()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left icon"></i>
+                    Go Back
+                </a>
+                {% if error_code|int >= 500 %}
+                <button onclick="location.reload()" class="btn btn-secondary">
+                    <i class="fas fa-redo icon"></i>
+                    Retry
+                </button>
+                {% endif %}
+            </div>
+            
+            <div class="timestamp">
+                <i class="fas fa-clock icon"></i>
+                Error occurred at: {{ timestamp }}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleTraceback() {
+            const content = document.getElementById('traceback-content');
+            const button = document.querySelector('.traceback-toggle');
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                button.innerHTML = '<i class="fas fa-code icon"></i> Show Full Traceback';
+            } else {
+                content.classList.add('show');
+                button.innerHTML = '<i class="fas fa-times icon"></i> Hide Traceback';
+            }
+        }
+        
+        // Auto-show traceback if URL has #traceback hash
+        if (window.location.hash === '#traceback') {
+            setTimeout(toggleTraceback, 100);
+        }
+    </script>
+</body>
+</html>
