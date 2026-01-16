@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini JS IDE</title>
+<style>
+  body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+  textarea { width: 100%; height: 200px; font-family: monospace; font-size: 14px; }
+  #console { white-space: pre-wrap; background: #000; color: #0f0; padding: 10px; margin-top: 10px; min-height: 150px; overflow-y: auto; }
+  button { margin-top: 10px; padding: 0.5rem 1rem; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>Mini JS IDE</h1>
+<textarea id="code" placeholder="Write your JS code here..."></textarea><br>
+<button onclick="runCode()">Run</button>
+
+<div id="console"></div>
+
+<script>
+const API_URL = "https://qynix.nue.dom.my.id/apis/coderunner/run_js";
+
+// Escape backticks and backslashes to safely send code
+function escapeCode(code) {
+  return code.replace(/\\/g, "\\\\").replace(/`/g, "\\`");
+}
+
+async function runCode() {
+  const codeArea = document.getElementById("code");
+  const code = codeArea.value;
+  const consoleDiv = document.getElementById("console");
+
+  consoleDiv.innerHTML = "Running...\n===================================================\n\n";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: escapeCode(code) })
+    });
+
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      consoleDiv.innerHTML += "\nError: Response is not JSON\n" + text;
+      return;
+    }
+
+    if (data.Status) {
+      consoleDiv.innerHTML += data.Output || "";
+    } else {
+      consoleDiv.innerHTML += "\nError: " + data.Message;
+    }
+
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+  } catch (err) {
+    consoleDiv.innerHTML += "\nRequest failed: " + err.message;
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,78 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
+<title>Qynix</title>
+
+<!-- Favicons -->
 <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='Favicons/apple-touch-icon.png') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='Favicons/favicon-32x32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='Favicons/favicon-16x16.png') }}">
 <link rel="manifest" href="{{ url_for('static', filename='Favicons/site.webmanifest') }}">
-<meta charset="UTF-8">
-<title>Cypher</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-  /* Base & Reset */
-  * { box-sizing: border-box; margin:0; padding:0; font-family:'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  body { background:#f0f2f5; color:#333; line-height:1.6; }
+/* Reset & Base */
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background:#111; color:#fff; line-height:1.6; transition: background 0.3s ease; }
 
-  /* Header */
-  header { text-align:center; padding:3rem 1rem 2rem; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.05); border-radius:0 0 20px 20px; }
-  header h1 { font-size:2.5rem; margin-bottom:0.5rem; letter-spacing:1px; color:#111; }
-  header p { font-size:1.1rem; color:#555; }
+/* Header */
+header {
+  text-align:center; padding:4rem 1rem 3rem;
+  background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  color:#fff;
+  border-radius:0 0 30px 30px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.6);
+}
+header h1 { font-size:3rem; letter-spacing:1px; margin-bottom:0.5rem; text-shadow:0 0 10px #0ff; }
+header p { font-size:1.2rem; color:#ccc; }
 
-  /* Grid */
-  main.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:2rem; padding:0 2rem 3rem; max-width:1300px; margin:auto; }
+/* Grid Layout */
+main.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+  gap:2.5rem;
+  padding:0 2rem 4rem;
+  max-width:1400px;
+  margin:auto;
+}
 
-  /* Card */
-  .card { background:#fff; border-radius:20px; padding:2rem 1.5rem; box-shadow:0 8px 24px rgba(0,0,0,0.08); transition:transform 0.3s ease, box-shadow 0.3s ease; position:relative; overflow:hidden; }
-  .card:hover { transform:translateY(-8px); box-shadow:0 16px 48px rgba(0,0,0,0.12); }
-  .card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
-  .card h2 { font-size:1.5rem; font-weight:600; color:#222; }
-  .desc { margin-bottom:1rem; color:#555; font-size:1rem; }
+/* Card */
+.card {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border-radius:25px;
+  padding:2rem 1.5rem;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  transition:transform 0.3s ease, box-shadow 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.card:hover {
+  transform:translateY(-10px);
+  box-shadow:0 20px 60px rgba(0,255,255,0.5);
+}
+.card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.card h2 { font-size:1.6rem; font-weight:700; color:#fff; text-shadow:0 0 4px #0ff; }
+.desc { margin-bottom:1rem; color:#ddd; font-size:1rem; }
 
-  code.path { display:block; background:#f1f3f6; padding:0.6rem 1rem; border-radius:12px; font-size:0.9rem; color:#111; overflow-x:auto; font-family:monospace; }
+/* Code path */
+code.path {
+  display:block;
+  background: rgba(0,0,0,0.3);
+  padding:0.6rem 1rem;
+  border-radius:12px;
+  font-size:0.9rem;
+  color:#0ff;
+  overflow-x:auto;
+  font-family:monospace;
+  text-shadow:0 0 6px #0ff;
+}
 
-  /* Health badges modern */
-  .health {
-    font-weight:700; text-transform:uppercase; padding:0.4rem 0.9rem; border-radius:12px; font-size:0.85rem; letter-spacing:0.5px;
-    background: linear-gradient(135deg,#ccc,#ddd); color:#fff; position:relative; overflow:hidden;
-    display:inline-block; transition: all 0.3s ease;
-  }
-  .health::before {
-    content:""; position:absolute; top:0; left:-100%; width:100%; height:100%; background:rgba(255,255,255,0.2); transform:skewX(-20deg); transition:0.5s ease;
-  }
-  .health:hover::before { left:100%; }
+/* Health badges modern */
+.health {
+  font-weight:700;
+  text-transform:uppercase;
+  padding:0.4rem 0.9rem;
+  border-radius:12px;
+  font-size:0.85rem;
+  letter-spacing:0.5px;
+  position:relative;
+  display:inline-block;
+  overflow:hidden;
+  transition: all 0.3s ease;
+}
+.health::before {
+  content:"";
+  position:absolute;
+  top:0; left:-100%;
+  width:100%; height:100%;
+  background:rgba(255,255,255,0.15);
+  transform:skewX(-20deg);
+  transition:0.5s ease;
+}
+.health:hover::before { left:100%; }
 
-  /* Modern gradient colors for statuses */
-  .health.stable { background: linear-gradient(135deg,#28a745,#85e089); color:#fff; }
-  .health.beta { background: linear-gradient(135deg,#ffc107,#ffe58a); color:#333; }
-  .health.currently-unavailable { background: linear-gradient(135deg,#dc3545,#ff7a7a); color:#fff; }
-  .health.fixing { background: linear-gradient(135deg,#17a2b8,#74d4e3); color:#fff; }
-  .health.deleted { background: linear-gradient(135deg,#6c757d,#a6a6a6); color:#fff; }
-  .health.maintenance { background: linear-gradient(135deg,#fd7e14,#ffbb78); color:#fff; } /* optional extra status */
+/* Status Gradients */
+.health.stable { background: linear-gradient(135deg,#28a745,#85e089); color:#fff; text-shadow:0 0 6px #28a745; }
+.health.beta { background: linear-gradient(135deg,#ffc107,#ffe58a); color:#111; text-shadow:0 0 6px #ffc107; }
+.health.currently-unavailable { background: linear-gradient(135deg,#dc3545,#ff7a7a); color:#fff; animation: pulse 2s infinite; }
+.health.fixing { background: linear-gradient(135deg,#17a2b8,#74d4e3); color:#fff; animation: pulse 2s infinite; }
+.health.deleted { background: linear-gradient(135deg,#6c757d,#a6a6a6); color:#fff; }
+.health.maintenance { background: linear-gradient(135deg,#fd7e14,#ffbb78); color:#fff; }
+.health.in-development {
+  background: linear-gradient(45deg, #ff00ff, #00ffff, #ffea00);
+  color:#fff;
+  font-weight:bold;
+  text-shadow:0 0 8px #fff,0 0 16px #ff00ff,0 0 24px #00ffff;
+  box-shadow:0 0 12px #ff00ff,0 0 24px #00ffff,0 0 36px #ffea00;
+  border-radius:12px;
+  animation: neonGlow 2s ease-in-out infinite alternate;
+}
 
-  /* Animated pulse for unstable states */
-  .health.currently-unavailable, .health.fixing {
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { transform: scale(1); opacity:1; }
-    50% { transform: scale(1.05); opacity:0.85; }
+@keyframes neonGlow {
+  0% { box-shadow:0 0 10px #ff00ff,0 0 20px #00ffff,0 0 30px #ffea00; }
+  100% { box-shadow:0 0 20px #ff00ff,0 0 40px #00ffff,0 0 60px #ffea00; }
+}
 
-  }
-  a {
-  text-decoration: none;
-  color: inherit;
-  }
+/* Pulse animation for unstable states */
+@keyframes pulse {
+  0%,100% { transform: scale(1); opacity:1; }
+  50% { transform: scale(1.05); opacity:0.85; }
+}
 
-  /* No apps */
-  .no-apps { text-align:center; font-size:1.3rem; color:#777; padding:3rem; grid-column:1 / -1; }
+/* Links */
+a { text-decoration:none; color:inherit; }
 
-  /* Responsive */
-  @media(max-width:500px){ main.grid{padding:0 1rem 2rem;} }
+/* No apps */
+.no-apps { text-align:center; font-size:1.3rem; color:#aaa; padding:3rem; grid-column:1 / -1; }
+
+/* Responsive */
+@media(max-width:500px){ main.grid{padding:0 1rem 2rem;} }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Unified Access Point for all Services</h1>
+  <h1>Unified Access Point for All Services</h1>
   <p>Available services</p>
 </header>
 
@@ -82,7 +146,7 @@
       <a href="{{ a.path }}" class="card">
         <div class="card-top">
           <h2>{{ a.name }}</h2>
-          <span class="health {{ a.health|replace(' ','-')|lower }}">{{ a.health }}</span>
+          <span class="health {{ a.health.strip()|replace(' ','-')|lower }}">{{ a.health }}</span>
         </div>
         <p class="desc">{{ a.desc }}</p>
         <code class="path">{{ a.path }}</code>

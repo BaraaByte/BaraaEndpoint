@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini Python IDE</title>
+<style>
+  body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+  textarea { width: 100%; height: 200px; font-family: monospace; font-size: 14px; }
+  #console { white-space: pre-wrap; background: #000; color: #0f0; padding: 10px; margin-top: 10px; min-height: 150px; overflow-y: auto; }
+  #console input { background:#000; color:#0f0; border:none; font-family: monospace; font-size:16px; width:50%; }
+</style>
+</head>
+<body>
+
+<h1>Mini Python IDE</h1>
+<textarea id="code" placeholder="Write your Python code here..."></textarea><br>
+<button onclick="runCode()">Run</button>
+
+<div id="console"></div>
+
+<script>
+const API_URL = "https://qynix.nue.dom.my.id/apis/coderunner/run-py";
+let pendingInputs = [];
+
+// Extract all input() calls with optional prompt text
+function extractInputsWithPrompts(code) {
+  const inputRegex = /input\s*\(\s*(['"`])(.*?)\1\s*\)/g;
+  const matches = [];
+  while (true) {
+    const match = inputRegex.exec(code);
+    if (!match) break;
+    matches.push({ prompt: match[2] || "" });
+  }
+  return matches;
+}
+
+function runCode() {
+  const codeArea = document.getElementById("code");
+  const code = codeArea.value;
+  const consoleDiv = document.getElementById("console");
+
+  consoleDiv.innerHTML = "Running...\n===================================================\n\n";
+  pendingInputs = [];
+
+  const inputs = extractInputsWithPrompts(code);
+  if (inputs.length === 0) {
+    sendToAPI(code, []);
+  } else {
+    startInputSequence(code, inputs);
+  }
+}
+
+// Show fake input directly in console
+function startInputSequence(code, inputs) {
+  const consoleDiv = document.getElementById("console");
+  let current = 0;
+
+  function showPrompt() {
+    const promptText = inputs[current].prompt || "Input";
+
+    const promptLine = document.createElement("div");
+    promptLine.textContent = promptText + ": ";
+
+    const inputEl = document.createElement("input");
+    inputEl.type = "text";
+    promptLine.appendChild(inputEl);
+    consoleDiv.appendChild(promptLine);
+    inputEl.focus();
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+
+    inputEl.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        const val = inputEl.value;
+        pendingInputs.push(val);
+
+        // Replace input box with text
+        promptLine.textContent = promptText + ": " + val;
+
+        current++;
+        if (current < inputs.length) {
+          showPrompt();
+        } else {
+          sendToAPI(code, pendingInputs);
+        }
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+      }
+    });
+  }
+
+  showPrompt();
+}
+
+// Send code + inputs to Flask API
+async function sendToAPI(code, inputs) {
+  const consoleDiv = document.getElementById("console");
+
+  try {
+    const res = await fetch("https://qynix.nue.dom.my.id/apis/coderunner/run-py", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, input: inputs })
+    });
+
+    const text = await res.text(); // get raw response
+    let data;
+
+    try {
+      data = JSON.parse(text); // try parsing JSON
+    } catch {
+      consoleDiv.innerHTML += "\nError: Response is not JSON";
+      consoleDiv.innerHTML += "\n--- Raw Response ---\n" + text; // show full raw response
+      console.error("Invalid JSON response:", text);
+      return;
+    }
+
+    if (data.Status) {
+      consoleDiv.innerHTML += (data.Output || "");
+    } else {
+      consoleDiv.innerHTML += "\nError: " + data.Message;
+    }
+
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+  } catch (err) {
+    consoleDiv.innerHTML += "\nRequest failed: " + err.message;
+  }
+}
+</script>
+
+</body>
+</html>

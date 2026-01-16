@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+
+<header class="top">
+  <h1>⚡ Control Panel</h1>
+  <a href="/logout">Logout</a>
+</header>
+
+<section class="grid">
+
+  <!-- Stats Cards -->
+  <div class="card stat">
+    <h3>CPU</h3><span id="cpu">-</span>%
+  </div>
+  <div class="card stat">
+    <h3>RAM</h3><span id="ram">-</span>%
+  </div>
+  <div class="card stat">
+    <h3>Storage</h3><span id="storage">-</span>
+    <small id="storageText"></small>
+  </div>
+  <div class="card stat">
+    <h3>Uptime</h3><span id="uptime">-</span> sec
+  </div>
+
+  <!-- Restart / Clear -->
+  <div class="card">
+    <button onclick="restart()">Restart App</button>
+    <button onclick="clearCache()">Clear Cache</button>
+  </div>
+
+  <!-- Apps Storage Table + Chart -->
+  <div class="card">
+    <h3>📦 Projects</h3>
+    <canvas id="appsChart" height="150"></canvas>
+    <div id="appsTable"></div>
+  </div>
+
+  <!-- Logs -->
+  <div class="card logs">
+    <h3>Logs</h3>
+    <pre id="logs">Loading...</pre>
+  </div>
+
+</section>
+
+<script src="/static/chart.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

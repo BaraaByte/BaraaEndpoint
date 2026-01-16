@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, render_template, request, redirect, session, jsonify, abort
 from flask_cors import CORS
 import os, json, traceback
 from data.apps import APPS
@@ -7,6 +7,10 @@ from flask.json.provider import DefaultJSONProvider
 from datetime import datetime
 import logging
 from logging.handlers import RotatingFileHandler
+from werkzeug.security import check_password_hash
+from users import USERS
+import action
+from Apps.CodeRunner import coderun_bp
 
 # ---------- JSON Provider ----------
 class CustomJSONProvider(DefaultJSONProvider):
@@ -19,6 +23,13 @@ class CustomJSONProvider(DefaultJSONProvider):
 
 load_dotenv()
 
+def login_required(fn):
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            abort(401)
+        return fn(*args, **kwargs)
+    wrapper.__name__ = fn.__name__
+    return wrapper
 # ---------- Logging Setup ----------
 LOG_FILE = os.path.expanduser("~/logs/flask.log")
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
@@ -72,24 +83,23 @@ def safe_extract_traceback(error):
             return str(error)
         except Exception:
             return "Could not extract error details"
-
+BASE_URL = "/apis"
 # ---------- App Factory ----------
 def create_app():
     app = Flask(__name__)
     app.json_provider_class = CustomJSONProvider
     app.json = app.json_provider_class(app)
+    app.secret_key = "CHANGE_THIS_SECRET_KEY"
     
     # Enable CORS
     CORS(app, resources={
-        r"/api/*": {
-            "origins": ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"]
-        }
+    r"/api/*": {"origins": "*", "methods": ["GET","POST","OPTIONS"]},
+    r"/apis/*": {"origins": "*", "methods": ["GET","POST","OPTIONS"]}
     })
     
     # ---------- Setup Logging ----------
     setup_logging(app)
+    app.register_blueprint(coderun_bp, url_prefix=f"{BASE_URL}/coderunner")
     
     # ---------- Error Handlers ----------
     @app.errorhandler(400)
@@ -164,6 +174,64 @@ def create_app():
             "service": "Flask App"
         })
     
+    @app.route("/login", methods=["GET","POST"])
+    def login():
+        if request.method=="POST":
+            u = request.form["username"]
+            p = request.form["password"]
+            if u in USERS and check_password_hash(USERS[u], p):
+                session["user"] = u
+                return redirect("/dashboard")
+            return render_template("login.html", error="Invalid login")
+        return render_template("login.html")
+
+    @app.route("/logout")
+    def logout():
+        session.clear()
+        return redirect("/login")
+
+    # ---------------- Dashboard ----------------
+    @app.route("/dashboard")
+    @login_required
+    def dashboard():
+        return render_template("dashboard.html")
+
+    # ---------------- API ----------------
+    @app.route("/api/status")
+    @login_required
+    def status():
+        storage = action.get_storage()
+        return jsonify(
+            cpu=action.get_cpu(),
+            ram=action.get_ram(),
+            uptime=action.get_uptime(),
+            storage=storage
+        )
+
+    @app.route("/api/apps-storage")
+    @login_required
+    def apps_storage():
+        return jsonify(action.get_apps_storage())
+
+    @app.route("/api/logs")
+    @login_required
+    def logs():
+        return jsonify(logs=action.get_logs(100))
+
+    @app.route("/api/restart", methods=["POST"])
+    @login_required
+    def restart():
+        project = request.args.get("project")
+        action.restart_app(project)
+        return jsonify(ok=True)
+
+    @app.route("/api/clear-cache", methods=["POST"])
+    @login_required
+    def clear_cache():
+        project = request.args.get("project")
+        action.clear_cache(project)
+        return jsonify(ok=True)
+
     return app
 
 # ---------- Create App ----------
@@ -181,4 +249,4 @@ except Exception as e:
 # ---------- Run Locally ----------
 if __name__ == '__main__':
     app.logger.info("Starting development server...")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)
