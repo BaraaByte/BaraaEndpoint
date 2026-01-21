@@ -5,11 +5,12 @@ coderun_bp = Blueprint("coderun_bp", __name__)
 @coderun_bp.route("/", methods=["GET"])
 def index():
   return jsonify({
-    "status": "Beta",
-    "Notes": "This app in Beta, Do not use it as Primary App",
+    "status": "Stable",
     "routes":{
-      "/run": "Run Code and return output (Run Only Python and Beta)",
-      "/ide": "Simple IDE that can test the API (Only Python)"
+      "/run-py": "Run Python Code and return output",
+      "/js_run": "Run JavaScript Code and return output",
+      "/ide-py": "Simple IDE that can test the Python API",
+      "/ide-js": "Simple IDE that can test the JavaScript	 API",
     }
   })
   

@@ -12,7 +12,7 @@ APPS = [
         "name": "Code Runner",
         "path": "/apis/coderunner",
         "desc": "An Safe Api To run Codes",
-        "health": "Beta",
+        "health": "Stable",
         "type": "Normal"
     }
 ]

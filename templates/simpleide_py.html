@@ -19,7 +19,7 @@
 <div id="console"></div>
 
 <script>
-const API_URL = "https://qynix.nue.dom.my.id/apis/coderunner/run-py";
+const API_URL = "https://ayero.nue.dom.my.id/apis/coderunner/run-py";
 let pendingInputs = [];
 
 // Extract all input() calls with optional prompt text
@@ -95,7 +95,7 @@ async function sendToAPI(code, inputs) {
   const consoleDiv = document.getElementById("console");
 
   try {
-    const res = await fetch("https://qynix.nue.dom.my.id/apis/coderunner/run-py", {
+    const res = await fetch("https://ayero.nue.dom.my.id/apis/coderunner/run-py", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code, input: inputs })

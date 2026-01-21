@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "vm2": "^3.10.1"
+    "isolated-vm": "^6.0.2"
   }
 }
